@@ -186,6 +186,7 @@ def makePseudoInputPlots(outDir):
             systhistos[process+'_'+syst_cur+'_'+tag].SetFillColor(0)
 
     outfile = ROOT.TFile(outDir+'pseudo_inputs.root','new')
+
     #Make the plots - masshistos
     for tag in channels:
         tag1 = ''
@@ -225,6 +226,7 @@ def makePseudoInputPlots(outDir):
 
         #Make the plots - systs
         for key in systhistos.keys():
+            if tag1 not in key: continue
             if 'TT' in key: continue
             bkg_histo = bkghistos['QCD_template_'+tag1+'.root'].Clone()
             bkg_histo.Add(bkghistos['WJets_template_'+tag1+'.root'].Clone())
@@ -253,7 +255,7 @@ def makePseudoInputPlots(outDir):
             total_hist.Add(sig_histo.Clone())
 
             #total_stack.SaveAs(outDir+'stack_syst_'+key+'_'+tag+'.root')
-            total_hist.Write('syst_'+key+'_'+tag)
+            total_hist.Write('syst_'+key)
 
     outfile.Close()
 
