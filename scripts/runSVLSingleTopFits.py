@@ -144,8 +144,6 @@ def gatherHistos(inputdir, verbose=0):
 		if verbose>0: print '... processing', procname
 		fname = '%s.root' % procname
 
-		#inputdir needs to have outputs of runSVLSingleTop (ie. rootfiles_*) for nominal and additional masses
-
 		if not fname in os.listdir(inputdir):
 			if verbose>0: print '%s not found'%(fname)
 			continue
@@ -179,8 +177,6 @@ def gatherHistos(inputdir, verbose=0):
 					hists[(pname,key[1],chan)] = histo
 
 	# Now the backgrounds
-
-	# inputdir also needs to have background modeling rootfiles
 
 	for fname in os.listdir(inputdir):
 		if not osp.splitext(fname)[1] == '.root': continue

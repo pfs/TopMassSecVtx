@@ -145,12 +145,19 @@ def makePseudoInputPlots(outDir):
     systs = ['scaledown','scaleup','matchingdown','matchingup','TuneP11mpiHi','TuneP11noCR','TuneP11','TuneP11TeV','widthx5','mcatnlo','Z2Star']
 
     for weight in weight_opts:
-        for ch in channels1:
+        for ch in channels:
             systhistos[weight+'_'+ch] = None
 
     for weight in weight_opts:
-        for tag in channels1:
-            rootfile_nominal.cd('SVLMass_'+weight+'_'+tag)
+        for tag in channels:
+            tag1 = ''
+            if tag == 'm2j':
+                tag1 = 'mu2j'
+            elif tag == 'm3j':
+                tag1 = 'mu3j'
+            else:
+                tag1 = tag
+            rootfile_nominal.cd('SVLMass_'+weight+'_'+tag1)
             for key in ROOT.gDirectory.GetListOfKeys():
                 name = key.GetName()
                 hist = ROOT.TH1F()
@@ -180,8 +187,15 @@ def makePseudoInputPlots(outDir):
 
         hist = ROOT.TH1F()
 
-        for tag in channels1:
-            ROOT.gDirectory.GetObject('SVLMass_'+tag,hist)
+        for tag in channels:
+            tag1 = ''
+            if tag == 'm2j':
+                tag1 = 'mu2j'
+            elif tag == 'm3j':
+                tag1 = 'mu3j'
+            else:
+                tag1 = tag
+            ROOT.gDirectory.GetObject('SVLMass_'+tag1,hist)
             systhistos[process+'_'+syst_cur+'_'+tag] = hist.Clone()
             systhistos[process+'_'+syst_cur+'_'+tag].SetFillColor(0)
 
@@ -209,24 +223,16 @@ def makePseudoInputPlots(outDir):
             bkg_histo.SetFillColor(ROOT.kBlue)
             ttbar_histo.SetFillColor(ROOT.kGray)
             sig_histo.SetFillColor(ROOT.kRed)
-
-            #sig_histo.Rebin()
             
             total_hist = bkg_histo.Clone()
             total_hist.Add(ttbar_histo.Clone())
             total_hist.Add(sig_histo.Clone())
             
-            #total_stack = ROOT.THStack()
-            #total_stack.Add(bkg_histo.Clone())
-            #total_stack.Add(ttbar_histo.Clone())
-            #total_stack.Add(sig_histo.Clone())
-
-            #total_stack.SaveAs(outDir+'stack_mass_check_'+mass+'_'+tag+'.root')
             total_hist.Write('mass_check_'+mass+'_'+tag)
 
         #Make the plots - systs
         for key in systhistos.keys():
-            if tag1 not in key: continue
+            if tag not in key: continue
             if 'TT' in key: continue
             bkg_histo = bkghistos['QCD_template_'+tag1+'.root'].Clone()
             bkg_histo.Add(bkghistos['WJets_template_'+tag1+'.root'].Clone())
@@ -243,18 +249,10 @@ def makePseudoInputPlots(outDir):
             ttbar_histo.SetFillColor(ROOT.kGray)
             sig_histo.SetFillColor(ROOT.kRed)
 
-            #sig_histo.Rebin()
-
-            #total_stack = ROOT.THStack()
-            #total_stack.Add(bkg_histo.Clone())
-            #total_stack.Add(ttbar_histo.Clone())
-            #total_stack.Add(sig_histo.Clone())
-
             total_hist = bkg_histo.Clone()
             total_hist.Add(ttbar_histo.Clone())
             total_hist.Add(sig_histo.Clone())
 
-            #total_stack.SaveAs(outDir+'stack_syst_'+key+'_'+tag+'.root')
             total_hist.Write('syst_'+key)
 
     outfile.Close()

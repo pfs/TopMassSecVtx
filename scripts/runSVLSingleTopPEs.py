@@ -148,11 +148,11 @@ def runPseudoExperiments(wsfile, pefile, experimentTag, options):
 
             # Read histogram and generate random data
             ihist = inputDistsF.Get('%s_%s'%(experimentTag,chan))
-            if experimentTag.startswith('syst'):
-                print '###########################'
-                print 'syst input histograms are ambiguous'
-                print '###########################'
-                return -1
+#            if experimentTag.startswith('syst'):
+#                print '###########################'
+#                print 'syst input histograms are ambiguous'
+#                print '###########################'
+#                return -1
 
             nevtsSeed = ihist.Integral()
             nevtsToGen = ROOT.gRandom.Poisson(nevtsSeed)
@@ -308,8 +308,8 @@ def main():
 
         # Check all the existing variations
         allTags = [tkey.GetName() for tkey in peInputFile.GetListOfKeys()]
-        allSysts  = sorted(list(set([t.rsplit('_',2)[0] for t in allTags if
-                                                     t.startswith('syst')])))
+        allSysts  = sorted(list(set([t.rsplit('_',1)[0] for t in allTags if
+                                                     t.startswith('syst')])))#Was rsplit('_',2)
         allMasses = sorted(list(set([t.rsplit('_',1)[0] for t in allTags if
                                                      t.startswith('mass')])))
         peInputFile.Close()

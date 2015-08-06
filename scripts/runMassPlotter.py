@@ -671,7 +671,7 @@ def makeSystPlots(outDir):
             ratplot = RatioPlot('ratioplot')
             ratplot.normalized = False
             ratplot.ratiotitle = 'Ratio wrt Nominal Weight '+tag
-            ratplot.ratiorange = (0.5,1.5)
+            ratplot.ratiorange = (0.9995,1.0005)
             
             reference = histos['nominal_'+tag].Clone()
             ratplot.reference = reference
@@ -685,7 +685,7 @@ def makeSystPlots(outDir):
                 ratplot.add(hist,legentry)
             ratplot.tag = 'Reweighting '+weight_names[i]
             ratplot.suptag = 'syst '+weight_names[i]
-            ratplot.show('syst_'+weight_names[i]+'_compare_reweight',outDir)
+            ratplot.show('syst_'+weight_names[i]+'_compare_reweight_'+tag,outDir)
             ratplot.reset()
         i+=1
 
@@ -697,7 +697,7 @@ def makeSystPlots(outDir):
                 ratplot = RatioPlot('ratioplot')
                 ratplot.normalized = False
                 ratplot.ratiotitle = 'Ratio wrt Nominal '+proc+' '+tag
-                ratplot.ratiorange = (0.5,1.5)
+                ratplot.ratiorange = (0.9995,1.0005)
                 if proc == 'SingleT':
                     reference = histos['nominal_'+tag].Clone()
                     ratplot.reference = reference
