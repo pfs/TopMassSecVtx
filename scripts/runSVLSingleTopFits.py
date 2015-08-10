@@ -372,7 +372,7 @@ def createWorkspace(masshistos, options):
 			getattr(ws,'import')(ROOT.RooDataHist(ht.GetName(), ht.GetTitle(), ROOT.RooArgList(SVLmass), ht))
 
 	print "Done extracting histograms, commencing fits"
-
+	raw_input("press key to continue")
 
 	for chan in CHANNELS:
 	 	parameterizeSignalFraction(ws=ws, chan=chan, masses=masses,

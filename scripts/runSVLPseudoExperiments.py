@@ -522,7 +522,9 @@ def runPseudoExperiments(wsfile,pefile,experimentTag,options):
 def submitBatchJobs(wsfile, pefile, experimentTags, options, queue='8nh'):
     import time
     cmsswBase = os.environ['CMSSW_BASE']
-    sel=options.selection
+    sel=''
+    #EDIT
+    #sel=options.selection
     if len(sel)==0 : sel='inclusive'
     baseJobsDir='svlPEJobs'
     if options.calib : baseJobsDir+='_calib'
@@ -556,12 +558,14 @@ def submitBatchJobs(wsfile, pefile, experimentTags, options, queue='8nh'):
         scriptFile.write('cd %s\n'%jobsDir)
         command = ('runSVLPseudoExperiments.py %s %s -o %s -v 3 %s -n %d' %
                       (wsfilepath, pefilepath, odirpath, tag, options.nPexp))
-        if options.genFromPDF:
-            command += ' --genFromPDF'
+        #EDIT
+        #if options.genFromPDF:
+        #    command += ' --genFromPDF'
         if options.calib:
             command += ' --calib %s' % osp.abspath(options.calib)
-        if len(options.selection):
-            command += ' --selection %s'%options.selection
+        #EDIT
+        #if len(options.selection):
+        #    command += ' --selection %s'%options.selection
         scriptFile.write('%s\n'%command)
         scriptFile.close()
         os.system('chmod u+rwx %s'%scriptFileN)
