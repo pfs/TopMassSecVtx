@@ -128,6 +128,7 @@ def makePseudoInputPlots(outDir):
     for key in os.listdir('/afs/cern.ch/user/e/edrueke/edrueke/top_lxy/CMSSW_5_3_22/src/UserCode/TopMassSecVtx/singleTop/ratio_plots/bkg_templates/'):
         
         if '.png' in key: continue
+        if '.pdf' in key: continue
         rootfile = ROOT.TFile.Open('/afs/cern.ch/user/e/edrueke/edrueke/top_lxy/CMSSW_5_3_22/src/UserCode/TopMassSecVtx/singleTop/ratio_plots/bkg_templates/'+key)
 
         for histo in ROOT.gDirectory.GetListOfKeys():
@@ -168,22 +169,22 @@ def makePseudoInputPlots(outDir):
                     systhistos[weight+'_'+tag].Add(hist.Clone())
             systhistos[weight+'_'+tag].SetFillColor(0)
 
+    for syst in systs:
+        for ch in channels:
+            systhistos[syst+'_'+ch] = None
+            systhistos['SemiLep'+syst+'_'+ch] = None
+
     for key in os.listdir('/afs/cern.ch/user/e/edrueke/edrueke/top_lxy/CMSSW_5_3_22/src/UserCode/TopMassSecVtx/singleTop/rootfiles_syst/'):
 
         if 'TT' in key: continue
         rootfile = ROOT.TFile.Open('/afs/cern.ch/user/e/edrueke/edrueke/top_lxy/CMSSW_5_3_22/src/UserCode/TopMassSecVtx/singleTop/rootfiles_syst/'+key)
 
-        process = ''
         syst_cur = ''
         for syst in systs:
             if (syst in key) and (len(syst) > len(syst_cur)):
                 syst_cur = syst
         if 'SemiLep' in key:
-            syst_cur = 'SemiLep_'+syst_cur
-        if 'SingleT' in key:
-            process = 'SingleT'
-        if 'TTJets' in key:
-            process = 'TT'
+            syst_cur = 'SemiLep'+syst_cur
 
         hist = ROOT.TH1F()
 
@@ -196,8 +197,11 @@ def makePseudoInputPlots(outDir):
             else:
                 tag1 = tag
             ROOT.gDirectory.GetObject('SVLMass_'+tag1,hist)
-            systhistos[process+'_'+syst_cur+'_'+tag] = hist.Clone()
-            systhistos[process+'_'+syst_cur+'_'+tag].SetFillColor(0)
+            if systhistos[syst_cur+'_'+tag] == None:
+                systhistos[syst_cur+'_'+tag] = hist.Clone()
+            else:
+                systhistos[syst_cur+'_'+tag].Add(hist.Clone())
+            systhistos[syst_cur+'_'+tag].SetFillColor(0)
 
     outfile = ROOT.TFile(outDir+'pseudo_inputs.root','new')
 
@@ -232,8 +236,13 @@ def makePseudoInputPlots(outDir):
 
         #Make the plots - systs
         for key in systhistos.keys():
+            print key
             if tag not in key: continue
             if 'TT' in key: continue
+            print key
+            if systhistos[key]==None: continue
+            print key
+
             bkg_histo = bkghistos['QCD_template_'+tag1+'.root'].Clone()
             bkg_histo.Add(bkghistos['WJets_template_'+tag1+'.root'].Clone())
 

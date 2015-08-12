@@ -214,6 +214,7 @@ def makeTTbarPlots(outDir,norm=None):
 
     histos = {}
     histos_unweighted = {}
+    scales = {}
 
     #Fill histos directory with svlmass plots for ttbar with -0.05 <= BDT <= 0.11
     for tag in tags:
@@ -223,6 +224,7 @@ def makeTTbarPlots(outDir,norm=None):
         ROOT.gDirectory.GetObject('MC8TeV_TTJets_MSDecays_172v5_SVLMassWJets_'+tag,hist)
         hist.SetFillColor(0)
         hist.SetTitle('')
+        scales[tag+'_BDT']=hist.Integral()
         if norm=='norm':
             hist.Scale(1/hist.Integral())
         hist.Rebin()
@@ -262,6 +264,7 @@ def makeTTbarPlots(outDir,norm=None):
         ROOT.gDirectory.GetObject('MC8TeV_TTJets_MSDecays_172v5_SVLMass_'+tag,hist)
         hist.SetFillColor(0)
         hist.SetTitle('')
+        scales[tag]=hist.Integral()
         if norm=='norm':
             hist.Scale(1/hist.Integral())
         hist.Rebin()
@@ -317,9 +320,9 @@ def makeTTbarPlots(outDir,norm=None):
     else:
         ratplot.show('tt_e_compare',outDir)
         
-    histos_unweighted['e3j_data_BDT'].Scale(histos['e2j'].Integral())
+    histos_unweighted['e3j_data_BDT'].Scale(scales['e2j']/(histos_unweighted['e3j_data_BDT'].Integral()))
     histos_unweighted['e3j_data_BDT'].SaveAs(outDir+'bkg_templates/ttbar_template_e.root')
-    histos_unweighted['mu3j_data_BDT'].Scale(histos['mu2j'].Integral())
+    histos_unweighted['mu3j_data_BDT'].Scale(scales['mu2j']/(histos_unweighted['mu3j_data_BDT'].Integral()))
     histos_unweighted['mu3j_data_BDT'].SaveAs(outDir+'bkg_templates/ttbar_template_mu.root')
 
     can1 = ROOT.TCanvas()
@@ -371,6 +374,7 @@ def makeQCDPlots(outDir, norm=None):
     tags = ['e2j','e3j','mu2j','mu3j']
     histos = {}
     histos_unscaled = {}
+    scales = {}
 
     #runPlotter may save the QCD histogram as any of these names
     possibilities = ['QCDMuPt20toInf','QCDPt170to250','QCDPt250to350','QCDPt30to80','QCDPt350toInf','QCDPt80to170']
@@ -387,6 +391,7 @@ def makeQCDPlots(outDir, norm=None):
                 ROOT.gDirectory.GetObject('MC8TeV_'+p+'_SVLMassQCD_'+tag,hist1)
                 hist1.SetFillColor(0)
                 hist1.SetTitle('')
+                scales[tag+'QCD']=hist1.Integral()
                 if norm=='norm':
                     hist1.Scale(1/hist1.Integral())
                 hist1.Rebin()
@@ -400,6 +405,7 @@ def makeQCDPlots(outDir, norm=None):
                 ROOT.gDirectory.GetObject('MC8TeV_'+p+'_SVLMass_'+tag,hist2)
                 hist2.SetFillColor(0)
                 hist2.SetTitle('')
+                scales[tag]=hist2.Integral()
                 if norm=='norm':
                     hist2.Scale(1/hist2.Integral())
                 hist2.Rebin()
@@ -464,7 +470,7 @@ def makeQCDPlots(outDir, norm=None):
         else:
             ratplot.show('qcd_'+tag+'_compare',outDir)
 
-        histos_unscaled[tag+'_data'].Scale(histos[tag].Integral())
+        histos_unscaled[tag+'_data'].Scale(scales[tag]/(histos_unscaled[tag+'_data'].Integral()))
         histos_unscaled[tag+'_data'].SaveAs(outDir+'bkg_templates/QCD_template_'+tag+'.root')
         
         can = ROOT.TCanvas()
@@ -744,10 +750,10 @@ def makeSystPlots(outDir):
 Main function
 """
 def main():
-    makeMassScanPlots('/afs/cern.ch/user/e/edrueke/edrueke/top_lxy/CMSSW_5_3_22/src/UserCode/TopMassSecVtx/singleTop/ratio_plots/')
+    #makeMassScanPlots('/afs/cern.ch/user/e/edrueke/edrueke/top_lxy/CMSSW_5_3_22/src/UserCode/TopMassSecVtx/singleTop/ratio_plots/')
     makeTTbarPlots('/afs/cern.ch/user/e/edrueke/edrueke/top_lxy/CMSSW_5_3_22/src/UserCode/TopMassSecVtx/singleTop/ratio_plots/','norm')
     makeWJetsPlots('/afs/cern.ch/user/e/edrueke/edrueke/top_lxy/CMSSW_5_3_22/src/UserCode/TopMassSecVtx/singleTop/ratio_plots/','norm')
     makeQCDPlots('/afs/cern.ch/user/e/edrueke/edrueke/top_lxy/CMSSW_5_3_22/src/UserCode/TopMassSecVtx/singleTop/ratio_plots/','norm')
-    makeSystPlots('/afs/cern.ch/user/e/edrueke/edrueke/top_lxy/CMSSW_5_3_22/src/UserCode/TopMassSecVtx/singleTop/ratio_plots/syst')
+    #makeSystPlots('/afs/cern.ch/user/e/edrueke/edrueke/top_lxy/CMSSW_5_3_22/src/UserCode/TopMassSecVtx/singleTop/ratio_plots/syst')
 
 main()
