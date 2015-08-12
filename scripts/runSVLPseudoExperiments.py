@@ -133,7 +133,7 @@ def showFinalFitResult(data,pdf,nll,SVLMass,mtop,outDir,tag=None):
     p1.SetTopMargin(0.01)
     p1.SetBottomMargin(0.1)
     p1.Draw()
-
+    
     #fit results
     p1.cd()
     frame=SVLMass.frame()
@@ -147,7 +147,8 @@ def showFinalFitResult(data,pdf,nll,SVLMass,mtop,outDir,tag=None):
     pdf.plotOn(frame,
                ROOT.RooFit.Name('singlet'),
                ROOT.RooFit.ProjWData(data),
-               ROOT.RooFit.Components('tshape_*'),
+               #ROOT.RooFit.Components('tshape_*'),
+               ROOT.RooFit.Components('simplemodel_*_t'),
                ROOT.RooFit.FillColor(ROOT.kOrange+2),
                ROOT.RooFit.LineColor(ROOT.kOrange+2),
                ROOT.RooFit.FillStyle(1001),
@@ -156,7 +157,8 @@ def showFinalFitResult(data,pdf,nll,SVLMass,mtop,outDir,tag=None):
     pdf.plotOn(frame,
                ROOT.RooFit.Name('tt'),
                ROOT.RooFit.ProjWData(data),
-               ROOT.RooFit.Components('ttshape_*,tshape_*'),
+               ROOT.RooFit.Components('simplemodel_*_tt'),
+               #ROOT.RooFit.Components('ttshape_*,tshape_*'),
                #ROOT.RooFit.Components('*_ttcor_*'),
                ROOT.RooFit.FillColor(ROOT.kOrange),
                ROOT.RooFit.LineColor(ROOT.kOrange),

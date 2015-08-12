@@ -656,10 +656,8 @@ def makeSystPlots(outDir):
             ROOT.gDirectory.GetObject('SVLMass_'+tag,hist)
             try:
                 histos1[process+'_'+syst_cur+'_'+tag].Add(hist.Clone())
-                print('Added '+key)
             except KeyError:
                 histos1[process+'_'+syst_cur+'_'+tag]=hist.Clone()
-                print('Assigned '+key)
             histos1[process+'_'+syst_cur+'_'+tag].SetFillColor(0)
             histos1[process+'_'+syst_cur+'_'+tag].Scale(1/histos1[process+'_'+syst_cur+'_'+tag].Integral())
             histos1[process+'_'+syst_cur+'_'+tag].SetTitle('')
@@ -671,7 +669,7 @@ def makeSystPlots(outDir):
             ratplot = RatioPlot('ratioplot')
             ratplot.normalized = False
             ratplot.ratiotitle = 'Ratio wrt Nominal Weight '+tag
-            ratplot.ratiorange = (0.9995,1.0005)
+            ratplot.ratiorange = (0.5,1.5)
             
             reference = histos['nominal_'+tag].Clone()
             ratplot.reference = reference

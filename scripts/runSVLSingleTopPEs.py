@@ -193,7 +193,7 @@ def runPseudoExperiments(wsfile, pefile, experimentTag, options):
             # Show, if required
             if options.spy and i==0:
                 pll=nllMap['comb'][-1].createProfile(poi)
-                showFinalFitResult(data=pseudoData,pdf=allPdfs[key], nll=[pll,nllMap['comb'][-1]],
+                showFinalFitResult(data=pseudoData,pdf=allPdfs[chan], nll=[pll,nllMap['comb'][-1]],#allPdfs[key], nll=[pll,nllMap['comb'][-1]],
                                    SVLMass=ws.var('SVLMass'),mtop=ws.var('mtop'),
                                    outDir=options.outDir,
                                    tag=["%s channel"%(chan)])
