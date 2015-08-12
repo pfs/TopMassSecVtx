@@ -12,17 +12,23 @@ from pprint import pprint
 
 COLORS = [ROOT.kMagenta, ROOT.kMagenta+2, ROOT.kMagenta-9,
           ROOT.kViolet+2, ROOT.kAzure+7, ROOT.kBlue-7, ROOT.kYellow-3]
+#
+#CATTOLABEL = {
+#	'comb_0'   : 'Combined',
+#	'comb_3'   : '=3 trks',
+#	'comb_4'   : '=4 trks',
+#	'comb_5'   : '=5 trks',
+#	'combe_0'  : 'e+jets',
+#	'combee_0' : 'ee',
+#	'combem_0' : 'emu',
+#	'combm_0'  : 'mu+jets',
+#	'combmm_0' : 'mumu',
+#}
 
 CATTOLABEL = {
-	'comb_0'   : 'Combined',
-	'comb_3'   : '=3 trks',
-	'comb_4'   : '=4 trks',
-	'comb_5'   : '=5 trks',
-	'combe_0'  : 'e+jets',
-	'combee_0' : 'ee',
-	'combem_0' : 'emu',
-	'combm_0'  : 'mu+jets',
-	'combmm_0' : 'mumu',
+	'comb'     : 'Combined',
+	'e2j'      : 'Electron',
+	'm2j'      : 'Muon',
 }
 
 CATTOFLABEL = {
@@ -235,6 +241,7 @@ def parsePEResultsFromFile(url,verbose=False, doPlots=False):
 		
 		try:
 			mass = float(massstr+'.5')
+			massstr+='.5'
 		except:
 			mass = 172.5
 
@@ -269,30 +276,32 @@ def parsePEResultsFromFile(url,verbose=False, doPlots=False):
 
 			# add point for systematics
 			# if not useForCalib or mass==172.5:
-			results[(keyName,selection)][syst] = (mass+bias,biasErr)
-
+			#results[(keyName,selection)][syst] = (mass+bias,biasErr)
+			results[(keyName,selection)][massstr] = (mass+bias,biasErr)
 			# add statistical error for nominal 172.5:
-			if syst == '172.5':
+			#if syst == '172.5':
+			if massstr == '172.5':
 				results[(keyName,selection)]['stat'] = PEsummary['stat']
 			if not useForCalib: continue
 
 			# otherwise use it for calibration
 			np=0
+			print 'keyname = ',keyName
+			print 'selection = ',selection
 			try:
 				np=calibGrMap[keyName][selection].GetN()
-				print('tried and success')
 			except KeyError:
 				if not keyName in calibGrMap:
 					calibGrMap[keyName]    = {}
 					resCalibGrMap[keyName] = {}
 				calibGrMap[keyName][selection] = ROOT.TGraphErrors()
 				calibGrMap[keyName][selection].SetName(keyName)
-				calibGrMap[keyName][selection].SetTitle(selection)
+				#calibGrMap[keyName][selection].SetTitle(selection)
+				calibGrMap[keyName][selection].SetTitle(keyName)
 				calibGrMap[keyName][selection].SetMarkerStyle(20)
 				calibGrMap[keyName][selection].SetMarkerSize(1.0)
 				resCalibGrMap[keyName][selection]=calibGrMap[keyName][selection].Clone(keyName+'_res')
 				np = calibGrMap[keyName][selection].GetN()
-				print('excepted')
 			print(np)
 
 			#require less than 1 GeV in unc.
@@ -311,10 +320,8 @@ Shows results
 """
 def show(grCollMap,outDir,outName,xaxisTitle,yaxisTitle,
 		y_range=(160,190),x_range=(160,190),
-		baseDrawOpt='p',doFit=False, verbose=False):
+		baseDrawOpt='p',doFit=False, verbose=True):#verbose=False):
 	
-	print('A')
-
 	#prepare output
 	if not os.path.exists(outDir): os.system('mkdir -p %s' % outDir)
 
@@ -326,8 +333,6 @@ def show(grCollMap,outDir,outName,xaxisTitle,yaxisTitle,
 	ny=int(len(grCollMap)/nx)
 	while ny*nx<len(grCollMap) : ny+=1
 
-	print('B')
-
 	canvas = ROOT.TCanvas('c','c',nx*400,ny*250)
 	canvas.Divide(nx,ny)
 	ip=0
@@ -335,9 +340,7 @@ def show(grCollMap,outDir,outName,xaxisTitle,yaxisTitle,
 	line=ROOT.TLine(x_range[0],y_range[0],x_range[1],y_range[1])
 	line.SetLineStyle(2)
 	line.SetLineColor(ROOT.kGray)
-	print('C')
 	for key,grColl in sorted(grCollMap.items()):
-		print('D')
 		ip+=1
 		nleg=0
 		if ip==1:
@@ -347,17 +350,16 @@ def show(grCollMap,outDir,outName,xaxisTitle,yaxisTitle,
 			allLegs[nleg].SetTextFont(42)
 			allLegs[nleg].SetTextSize(0.06)
 			allLegs[nleg].SetBorderSize(0)
-		print('E')
 
 		yTitleOffset, yLabelSize = 0, 0
-		if 'comb_0' in key:
+		#if 'comb_0' in key:
+		if 'comb' in key:
 			padCtr=1
 			ip-=1
 			yTitleOffset, yLabelSize=0.8,0.07
 		else:
 			padCtr=ip+1
 		p = canvas.cd(padCtr)
-		print('F')
 
 		# if (padCtr-1)%nx==0:
 		p.SetLeftMargin(0.15)
@@ -372,7 +374,6 @@ def show(grCollMap,outDir,outName,xaxisTitle,yaxisTitle,
 		p.SetBottomMargin(0.15)
 		p.SetGridy()
 		p.SetGridx()
-		print('G')
 
 		#draw graphs on pads
 		igrctr=0
@@ -388,7 +389,7 @@ def show(grCollMap,outDir,outName,xaxisTitle,yaxisTitle,
 				gr.SetMarkerColor(color[igrctr])
 				gr.SetLineColor(color[igrctr])
 			if doFit and (gr.Integral()!=0):
-				print(str(gr.Integral()))
+				print 'Integral: ',str(gr.Integral())
 				gr.Fit('pol1','MQ+','same')
 				gr.GetFunction('pol1').SetParNames('par1','par2')
 				offset=(gr.GetFunction('pol1')).GetParameter('par1')#(0)
@@ -403,13 +404,15 @@ def show(grCollMap,outDir,outName,xaxisTitle,yaxisTitle,
 										slope, (offset+slope*172.5)-172.5))
 				#add to map
 				title=gr.GetTitle()
+				#print 'Title = ',title
 				if not (title in fitParamsMap): fitParamsMap[title]={}
 				# Inverted x and y, so have to invert fit parameters
+				#print 'offset = ',str(-1.0*offset/slope)
+				#print 'slope = ',str(1.0/slope)
 				fitParamsMap[title][key]=(-1.0*offset/slope,1.0/slope)
 				# fitParamsMap[title][key]=(offset,slope)
 			else:
 				print( 'skipped '+str(key))
-			print('H')
 
 			igrctr+=1
 			drawOpt='a'+baseDrawOpt if igrctr==1 else baseDrawOpt
@@ -426,9 +429,7 @@ def show(grCollMap,outDir,outName,xaxisTitle,yaxisTitle,
 			gr.GetYaxis().SetLabelSize(yLabelSize)
 			gr.GetXaxis().SetTitleSize(0.07)
 			gr.GetXaxis().SetLabelSize(0.07)
-			print('I')
-		print('J')
-
+		
 		if doFit: line.Draw('same')
 
 		#label this pad
@@ -438,40 +439,29 @@ def show(grCollMap,outDir,outName,xaxisTitle,yaxisTitle,
 		label.SetTextSize(0.08)
 		title=key
 		title=title.replace('_',', ')
-		print('K')
+		print 'title: ',title
 		if 'comb' in title:
 			title=title.replace('comb','combination ')
 			title=title.replace('0','')
 		else:
 			title=title.replace('m','#mu')
 			title += ' tracks'
-		print('K')
 		label.DrawLatex(0.2,0.8,'#it{'+title+'}')
-	print('L')
 
 	# independently of 'comb_0' being found, draw legend in first pad
 	try:
-		print('L1')
 		canvas.cd(1)
-		print('L2')
 		allLegs[nleg].Draw()
-		print('L3')
 		label.DrawLatex(0.2,0.9,'#bf{CMS} #it{simulation}')
-		print('L4')
 		canvas.cd()
-		print('L5')
 
 		#all done
 		canvas.Modified()
-		print('L6')
 		canvas.Update()
-		print('L7')
 		for ext in ['png','pdf']:
 			canvas.SaveAs(os.path.join(outDir,'%s.%s'%(outName,ext)))
-		print('L8')
 	except UnboundLocalError:
 		print 'WARNING: Missing some variations!'
-	print('M')
 	return fitParamsMap
 
 
@@ -482,6 +472,8 @@ def showSystematicsTable(results,filterCats):
 	#show results
 	selections = list(set([s for _,s in results.keys()]))
 	categories = list(set([k for k,_ in results.keys()]))
+
+	selections.append('')
 
 	# pprint(results)
 	# return 0
@@ -525,6 +517,13 @@ def showSystematicsTable(results,filterCats):
 def writeSystematicsTable(results,filterCats,ofile,printout=False):
 	selections = list(set([s for _,s in results.keys()]))
 	categories = list(set([k for k,_ in results.keys()]))
+
+	print 'Selections: '
+	for thing in selections:
+		print str(thing)
+	print 'Categories: '
+	for thing in categories:
+		print str(thing)
 
 	#create summary histograms
 	expUnc=ROOT.TH1F('expunc',';Category;Uncertainty [GeV]',len(filterCats),0,len(filterCats))
@@ -577,23 +576,34 @@ def writeSystematicsTable(results,filterCats,ofile,printout=False):
 		('ntkmult'   , ['ntkmult'],              'Track multiplicity',         '172.5', True) ,
 	]
 
+#############################################################################################
 	def writeSection(systs,sel,ofile,name=''):
+		print 'A'
 		uncup = {} # cat -> [up, up, up, ...] # all the positive shifts
 		uncdn = {} # cat -> [down, down, ...] # all the negative shifts
 		for syst,variations,title,difftag,insum in systs:
+			print 'B'
 			for var in variations:
+				print 'C'
 				# Print title only first time
 				if var == variations[0]: ofile.write('%-30s & '%title)
 				else:                    ofile.write('%-30s & ' % ' ')
-
-
+				print '%-30s & '%title
+				print 'Var: ',var
 				for cat in filterCats:
+					print 'D'
 					ups = uncup.setdefault(cat, [])
 					dns = uncdn.setdefault(cat, [])
 
 					try:
+						print 'E'
+						test = results[(cat,sel)][var][0]
+						print 'E1'
 						diff =               results[(cat,sel)][var][0]  - results[(cat,sel)][difftag][0]
 						diffErr = math.sqrt( results[(cat,sel)][var][1]**2+results[(cat,sel)][difftag][1]**2 )
+						
+						print 'Diff = ',diff
+						print 'dirrErr = ',diffErr
 
 						if 'pdf' in syst:
 							diff    *= 1.64485
@@ -602,21 +612,29 @@ def writeSystematicsTable(results,filterCats,ofile,printout=False):
 							diff    *= 0.1/5.0
 							diffErr *= 0.1/5.0
 
+						print 'F' 
+
 						if diff > 0:
 							diffstr = '$ +%4.2f \\pm %4.2f $ & ' % (diff, diffErr)
 							if insum: ups.append((diff,diffErr))
 						else:
 							diffstr = '$ %5.2f \\pm %4.2f $ & ' % (diff, diffErr)
 							if insum: dns.append((diff,diffErr))
+							
+						print 'G' 
 
 					except KeyError:
 						## Syst not defined, write empty entry
 						diffstr = '$ %14s $ & ' % (' ')
+						print 'H'
+						print diffstr
 
 					## Remove trailing &
 					if cat == filterCats[-1]: diffstr = diffstr[:-2]
 
+					print 'I'
 					ofile.write(diffstr)
+				print 'J'
 
 				ofile.write('\\\\')
 				ofile.write('\n')
@@ -654,8 +672,10 @@ def writeSystematicsTable(results,filterCats,ofile,printout=False):
 		with open(ofile,'w') as of:
 			of.write('\\hline\n')
 			if 'combe_0' in filterCats:
-				of.write('\multirow{2}{*}{Source} & \multicolumn{6}{c}{$\Delta$\mtop [\GeV]} \\\\\n')
-				of.write(30*' '+' & Combined & \ejets & \ee & \emu & \mujets & \mumu \\\\\n')
+				#of.write('\multirow{2}{*}{Source} & \multicolumn{6}{c}{$\Delta$\mtop [\GeV]} \\\\\n')
+				#of.write(30*' '+' & Combined & \ejets & \ee & \emu & \mujets & \mumu \\\\\n')
+				of.write('\multirow{2}{*}{Source} & \multicolumn{3}{c}{$\Delta$\mtop [\GeV]} \\\\\n')
+				of.write(30*' '+' & Combined & \ejets & \mujets \\\\\n')
 			else:
 				of.write('\multirow{2}{*}{Source} & \multicolumn{4}{c}{$\Delta$\mtop [\GeV]} \\\\\n')
 				of.write(30*' '+' & Combined & $=~3$ Tracks & $=~4$ Tracks & $=~5$ Tracks \\\\\n')
@@ -668,6 +688,7 @@ def writeSystematicsTable(results,filterCats,ofile,printout=False):
 			else:
 				of.write('\multicolumn{5}{l}{\\bf Theory uncertainties}\\\\\n')
 			of.write('\\hline\n')
+###########################################################################
 			totup_th,totupE_th,totdn_th,totdnE_th = writeSection(theosysts, sel, of, name='theo.')
 
 
@@ -742,16 +763,16 @@ def writeSystematicsTable(results,filterCats,ofile,printout=False):
 
 def makeSystPlot(results, totup, totdn):
 	assert(totup.keys() == totdn.keys())
-	for sel in totup.keys():
-		assert(totup[sel].keys() == totdn[sel].keys())
-		assert(sorted(totup[sel].keys()) == sorted(['comb_0',
-			                         'combe_0','combee_0',
-			                         'combem_0','combm_0',
-		                             'combmm_0', 'comb_3','comb_4',
-		                             'comb_5']))
+	#for sel in totup.keys():
+	#	assert(totup[sel].keys() == totdn[sel].keys())
+	#	assert(sorted(totup[sel].keys()) == sorted(['comb_0',
+	#		                         'combe_0','combee_0',
+	#		                         'combem_0','combm_0',
+	#	                             'combmm_0', 'comb_3','comb_4',
+	#	                             'comb_5']))
 
-	cats = ['comb_0', 'combem_0', 'combee_0', 'combmm_0', 'combe_0', 'combm_0', 'comb_3', 'comb_4', 'comb_5']
-
+	#cats = ['comb_0', 'combem_0', 'combee_0', 'combmm_0', 'combe_0', 'combm_0', 'comb_3', 'comb_4', 'comb_5']
+	cats = ['comb','e2j','m2j']
 	## Print it
 	for sel in totup.keys():
 		print 80*'-'
@@ -790,10 +811,14 @@ def makeSystPlot(results, totup, totdn):
 		graph_comb.SetName("systs_comb_%s"%sel)
 		graph_comb_stat = ROOT.TGraphAsymmErrors(1)
 		graph_comb_stat.SetName("systs_comb_stat_%s"%sel)
-		mt_comb = results[('comb_0',sel)]['172.5'][0]
-		staterr_comb = results[('comb_0',sel)]['stat'][0]
-		toterrup = math.sqrt(staterr_comb**2 + totup[sel]['comb_0']**2)
-		toterrdn = math.sqrt(staterr_comb**2 + totdn[sel]['comb_0']**2)
+		#mt_comb = results[('comb_0',sel)]['172.5'][0]
+		mt_comb = results[('comb',sel)]['172.5'][0]
+		#staterr_comb = results[('comb_0',sel)]['stat'][0]
+		staterr_comb = results[('comb',sel)]['stat'][0]
+		#toterrup = math.sqrt(staterr_comb**2 + totup[sel]['comb_0']**2)
+		#toterrdn = math.sqrt(staterr_comb**2 + totdn[sel]['comb_0']**2)
+		toterrup = math.sqrt(staterr_comb**2 + totup[sel]['comb']**2)
+		toterrdn = math.sqrt(staterr_comb**2 + totdn[sel]['comb']**2)
 		graph_comb.SetPoint(0, 0.5, mt_comb)
 		graph_comb.SetPointError(0, 0., 0., toterrdn, toterrup)
 		graph_comb_stat.SetPoint(0, 0.5, mt_comb)
@@ -837,7 +862,8 @@ def makeSystPlot(results, totup, totdn):
 		graph_comb_stat.SetLineColor(graph_comb.GetLineColor())
 
 		############################
-		chancats = ['combem_0','combee_0','combmm_0','combe_0','combm_0']
+		#chancats = ['combem_0','combee_0','combmm_0','combe_0','combm_0']
+		chancats = ['e2j','m2j']
 		chanxpos = [1.5,2.5,3.5,4.5,5.5]
 		graph_chan = ROOT.TGraphAsymmErrors(len(chancats))
 		graph_chan.SetName("systs_chan_%s"%sel)
@@ -862,29 +888,29 @@ def makeSystPlot(results, totup, totdn):
 		graph_chan_stat.SetLineColor(graph_chan.GetLineColor())
 
 		############################
-		ntrkcats = ['comb_3','comb_3','comb_5']
-		ntrkxpos = [6.5,7.5,8.5]
-		graph_ntrk = ROOT.TGraphAsymmErrors(len(ntrkcats))
-		graph_ntrk.SetName("systs_ntrk_%s"%sel)
-		graph_ntrk_stat = ROOT.TGraphAsymmErrors(len(ntrkcats))
-		graph_ntrk_stat.SetName("systs_ntrk_stat_%s"%sel)
-		for n,(xpos,cat) in enumerate(zip(ntrkxpos, ntrkcats)):
-			staterr = results[(cat,sel)]['stat'][0]
-			toterrup = math.sqrt(staterr**2 + totup[sel][cat]**2)
-			toterrdn = math.sqrt(staterr**2 + totdn[sel][cat]**2)
- 			graph_ntrk.SetPoint(n, xpos, results[(cat,sel)]['172.5'][0])
-			graph_ntrk.SetPointError(n, 0., 0., toterrdn, toterrup)
- 			graph_ntrk_stat.SetPoint(n, xpos, results[(cat,sel)]['172.5'][0])
-			graph_ntrk_stat.SetPointError(n, 0., 0., staterr, staterr)
-
-		graph_ntrk.SetLineWidth(1)
-		graph_ntrk.SetLineColor(ROOT.kGray+2)
-		graph_ntrk.SetMarkerStyle(20)
-		graph_ntrk.SetMarkerSize(1.0)
-		graph_ntrk.SetMarkerColor(graph_ntrk.GetLineColor())
-
-		graph_ntrk_stat.SetLineWidth(2)
-		graph_ntrk_stat.SetLineColor(ROOT.kGray+2)
+#		ntrkcats = ['comb_3','comb_3','comb_5']
+#		ntrkxpos = [6.5,7.5,8.5]
+#		graph_ntrk = ROOT.TGraphAsymmErrors(len(ntrkcats))
+#		graph_ntrk.SetName("systs_ntrk_%s"%sel)
+#		graph_ntrk_stat = ROOT.TGraphAsymmErrors(len(ntrkcats))
+#		graph_ntrk_stat.SetName("systs_ntrk_stat_%s"%sel)
+#		for n,(xpos,cat) in enumerate(zip(ntrkxpos, ntrkcats)):
+#			staterr = results[(cat,sel)]['stat'][0]
+#			toterrup = math.sqrt(staterr**2 + totup[sel][cat]**2)
+#			toterrdn = math.sqrt(staterr**2 + totdn[sel][cat]**2)
+# 			graph_ntrk.SetPoint(n, xpos, results[(cat,sel)]['172.5'][0])
+#			graph_ntrk.SetPointError(n, 0., 0., toterrdn, toterrup)
+# 			graph_ntrk_stat.SetPoint(n, xpos, results[(cat,sel)]['172.5'][0])
+#			graph_ntrk_stat.SetPointError(n, 0., 0., staterr, staterr)
+#
+#		graph_ntrk.SetLineWidth(1)
+#		graph_ntrk.SetLineColor(ROOT.kGray+2)
+#		graph_ntrk.SetMarkerStyle(20)
+#		graph_ntrk.SetMarkerSize(1.0)
+#		graph_ntrk.SetMarkerColor(graph_ntrk.GetLineColor())
+#
+#		graph_ntrk_stat.SetLineWidth(2)
+#		graph_ntrk_stat.SetLineColor(ROOT.kGray+2)
 
 		############################
 		canv = ROOT.TCanvas('c','c',800,300)
@@ -914,8 +940,8 @@ def makeSystPlot(results, totup, totdn):
 		graph_comb_stat.Draw("E")
 		graph_chan.Draw("PE")
 		graph_chan_stat.Draw("E")
-		graph_ntrk.Draw("PE")
-		graph_ntrk_stat.Draw("E")
+#		graph_ntrk.Draw("PE")
+#		graph_ntrk_stat.Draw("E")
 
 		## Labels
 		label=ROOT.TLatex()
@@ -927,7 +953,8 @@ def makeSystPlot(results, totup, totdn):
 		# label.DrawLatex(0.34,0.25,CATTOFLABEL['comb_0'])
 		# label.DrawLatex(0.15,0.50,"m_{top}^{comb.} = %5.2f^{+%4.2f}_{-%4.2f} GeV" % (mt_comb, totdn[sel]['comb_0'], totup[sel]['comb_0']))
 		label.DrawLatex(-3,mt_comb,"m_{top}^{comb.} = %5.2f^{+%4.2f}_{-%4.2f} #pm %4.2f GeV" %
-			                       (mt_comb, totup[sel]['comb_0'], totdn[sel]['comb_0'], staterr_comb))
+			                       #(mt_comb, totup[sel]['comb_0'], totdn[sel]['comb_0'], staterr_comb))
+			                       (mt_comb, totup[sel]['comb'], totdn[sel]['comb'], staterr_comb))
 
 		label.SetTextColor(ROOT.kGray+2)
 		label.SetTextSize(14)
@@ -1083,7 +1110,8 @@ def main():
 		#catsByChan =   ['comb_0','combe_0','combee_0','combem_0','combm_0','combmm_0']
 		#catsByTracks = ['comb_0','comb_3','comb_4','comb_5']
 		#allCats = ['comb_0','combe_0','combee_0','combem_0','combm_0','combmm_0', 'comb_3','comb_4','comb_5']
-		allCats = ['comb_0','combe_0','combm_0']
+		#allCats = ['comb_0','combe_0','combm_0']
+		allCats = ['comb','e2j','m2j']
 		# showSystematicsTable(results=results, filterCats=catsByChan)
 		# showSystematicsTable(results=results, filterCats=catsByTracks)
 

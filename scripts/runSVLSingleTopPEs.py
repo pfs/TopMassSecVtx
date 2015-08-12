@@ -109,9 +109,14 @@ def runPseudoExperiments(wsfile, pefile, experimentTag, options):
         offset, slope = 0.0, 1.0
         if calibMap:
             try:
-                offset, slope = calibMap[chan]
+                offset, slope = calibMap[chan][chan]
             except KeyError, e:
                 print 'Failed to retrieve calibration with',e
+            except ValueError, e:
+                print 'Too few values with',chan
+                print e
+        #print 'offset = ',offset
+        #print 'slope = ',slope
         ws.factory("RooFormulaVar::calibmtop_%s('(@0-%f)/%f',{mtop})"%(chan,offset,slope))
         allPdfs[(chan)] = ws.factory("EDIT::model_{chan}(uncalibmodel_{chan},mtop=calibmtop_{chan})".format(chan=chan))
 
