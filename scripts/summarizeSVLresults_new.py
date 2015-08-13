@@ -539,24 +539,25 @@ def writeSystematicsTable(results,filterCats,ofile,printout=False):
 
 	theosysts = [
 	##   systname   ,variations [up, down],          title,       variation to compare with, included in sum?
-		('powpyth'   , ['powpyth'],                    'Signal model',             '172.5', True ),
+		#('powpyth'   , ['powpyth'],                    'Signal model',             '172.5', True ),
 		# ('powherw'   , ['powherw'],                    'POWHEG+(Pythia vs Herwig)','powpyth', False ),
-		('scale'     , ['scaleup', 'scaledown'],       '$\\mu_R/\\mu_F$ scales \\ttbar',         '172.5', True ),
-		('tchscale'  , ['tchscaleup', 'tchscaledown'], '\\qquad\\qquad t-channel',       '172.5', True ),
-		('twchscale' , ['twchscaleup','twchscaledown'],'\\qquad\\qquad tW-channel',      '172.5', True ),
-		('matching'  , ['matchingup', 'matchingdown'], 'ME-PS scale',          '172.5', True ),
-		('width'     , ['width'],                      'Width',                '172.5', True ),
+		#('scale'     , ['scaleup', 'scaledown'],       '$\\mu_R/\\mu_F$ scales \\ttbar',         '172.5', True ),
+		#('tchscale'  , ['tchscaleup', 'tchscaledown'], '\\qquad\\qquad t-channel',       '172.5', True ),
+		#('twchscale' , ['twchscaleup','twchscaledown'],'\\qquad\\qquad tW-channel',      '172.5', True ),
+		#('matching'  , ['matchingup', 'matchingdown'], 'ME-PS scale',          '172.5', True ),
+		#('width'     , ['width'],                      'Width',                '172.5', True ),
 		#('hadmod'   , ['hadmod'],                     'Hadronization model',  '172.5', True ),
 		('bfnu'      , ['bfnuup', 'bfnudn'],           'Semi-lep. B decays',   '172.5', True ),
 		#('bfragdn'   , ['bfragdn'],                    '\ztwostar\ rb LEP soft', '172.5', False ),
-		('bfrag'     , ['bfrag'],                      'Fragmentation \ztwostar\ rb LEP',      '172.5', True ),
+		('bfragrbLEP', ['bfragdn','bfragup']            , '\ztwostar\ rb LEP (soft/hard)'        , 'bfrag' , True ) ,
+		#('bfrag'     , ['bfrag'],                      'Fragmentation \ztwostar\ rb LEP',      '172.5', True ),
 		#('bfragup'   , ['bfragup'],                    '\ztwostar\ rb LEP hard', '172.5', False ),
 		#('bfragp11'  , ['bfragp11'],                   'P11',                  '172.5', False ),
 		# ('bfragpete' , ['bfragpete'],                  '\ztwostar\ Peterson',    '172.5', False ),
 		# ('bfraglund' , ['bfraglund'],                  '\ztwostar\ Lund',        '172.5', False ),
 		('toppt'     , ['toppt'],                      'Top quark \\pt',       '172.5', True ),
-		('p11mpihi'  , ['p11mpihi','p11tev'],          'Underlying event',     'p11',   True ),
-		('p11nocr'   , ['p11nocr'],                    'Color reconnection',   'p11',   True ),
+		#('p11mpihi'  , ['p11mpihi','p11tev'],          'Underlying event',     'p11',   True ),
+		#('p11nocr'   , ['p11nocr'],                    'Color reconnection',   'p11',   True ),
 	]
 
 	# for i in xrange(1,52,2):
@@ -570,35 +571,32 @@ def writeSystematicsTable(results,filterCats,ofile,printout=False):
 		('lesup'     , ['lesup',    'lesdn'],    'Lepton energy scale',        '172.5', True) ,
 		('puup'      , ['puup',     'pudn'],     'Pileup',                     '172.5', True) ,
 		('btagup'    , ['btagup',   'btagdn'],   '\\cPqb-tagging',             '172.5', True) ,
-		('qcdup'     , ['qcdup',    'qcddown'],  'QCD normalization',          '172.5', True) ,
-		('dyup'      , ['dyup',     'dydown'],   'Drell-Yan normalization',    '172.5', True) ,
+		#('qcdup'     , ['qcdup',    'qcddown'],  'QCD normalization',          '172.5', True) ,
+		#('dyup'      , ['dyup',     'dydown'],   'Drell-Yan normalization',    '172.5', True) ,
 		('lepselup'  , ['lepselup', 'lepseldn'], 'Lepton selection',           '172.5', True) ,
 		('ntkmult'   , ['ntkmult'],              'Track multiplicity',         '172.5', True) ,
 	]
 
 #############################################################################################
 	def writeSection(systs,sel,ofile,name=''):
-		print 'A'
 		uncup = {} # cat -> [up, up, up, ...] # all the positive shifts
 		uncdn = {} # cat -> [down, down, ...] # all the negative shifts
 		for syst,variations,title,difftag,insum in systs:
-			print 'B'
 			for var in variations:
-				print 'C'
+			
 				# Print title only first time
 				if var == variations[0]: ofile.write('%-30s & '%title)
 				else:                    ofile.write('%-30s & ' % ' ')
 				print '%-30s & '%title
 				print 'Var: ',var
 				for cat in filterCats:
-					print 'D'
+					
 					ups = uncup.setdefault(cat, [])
 					dns = uncdn.setdefault(cat, [])
 
 					try:
-						print 'E'
 						test = results[(cat,sel)][var][0]
-						print 'E1'
+						
 						diff =               results[(cat,sel)][var][0]  - results[(cat,sel)][difftag][0]
 						diffErr = math.sqrt( results[(cat,sel)][var][1]**2+results[(cat,sel)][difftag][1]**2 )
 						
@@ -612,7 +610,6 @@ def writeSystematicsTable(results,filterCats,ofile,printout=False):
 							diff    *= 0.1/5.0
 							diffErr *= 0.1/5.0
 
-						print 'F' 
 
 						if diff > 0:
 							diffstr = '$ +%4.2f \\pm %4.2f $ & ' % (diff, diffErr)
@@ -621,18 +618,15 @@ def writeSystematicsTable(results,filterCats,ofile,printout=False):
 							diffstr = '$ %5.2f \\pm %4.2f $ & ' % (diff, diffErr)
 							if insum: dns.append((diff,diffErr))
 							
-						print 'G' 
-
 					except KeyError:
 						## Syst not defined, write empty entry
 						diffstr = '$ %14s $ & ' % (' ')
-						print 'H'
+						
 						print diffstr
 
 					## Remove trailing &
 					if cat == filterCats[-1]: diffstr = diffstr[:-2]
 
-					print 'I'
 					ofile.write(diffstr)
 				print 'J'
 
@@ -1055,6 +1049,8 @@ def main():
 		              help='show calibration')
 	parser.add_option('--syst', dest='syst', default=None,
 		              help='show systematics table')
+	parser.add_option('--outDir', dest='outDir', default='singelTop',
+		              help='outputDirectory')
 	parser.add_option('--rebin', dest='rebin', default=2, type=int,
 		              help='rebin pe plots by this factor')
 	parser.add_option('--compare', dest='compare', default='', type='string',
@@ -1115,7 +1111,7 @@ def main():
 		# showSystematicsTable(results=results, filterCats=catsByChan)
 		# showSystematicsTable(results=results, filterCats=catsByTracks)
 
-		systfile = os.path.join(os.path.dirname(opt.syst),'systematics_%s.tex')
+		systfile = os.path.join(os.path.dirname(opt.outDir),'systematics_%s.tex')
 		#writeSystematicsTable(results=results, filterCats=catsByChan,
 		#					 ofile=systfile%'bychan',printout=True)
 		#writeSystematicsTable(results=results, filterCats=catsByTracks,

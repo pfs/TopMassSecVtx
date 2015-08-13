@@ -144,11 +144,11 @@ def showFinalFitResult(data,pdf,nll,SVLMass,mtop,outDir,tag=None):
                ROOT.RooFit.LineColor(ROOT.kBlue),
                ROOT.RooFit.LineWidth(2),
                ROOT.RooFit.MoveToBack())
+    hpull = frame.pullHist()
     pdf.plotOn(frame,
                ROOT.RooFit.Name('singlet'),
                ROOT.RooFit.ProjWData(data),
-               #ROOT.RooFit.Components('tshape_*'),
-               ROOT.RooFit.Components('simplemodel_*_t'),
+               ROOT.RooFit.Components('simplemodel_*_t_*'),
                ROOT.RooFit.FillColor(ROOT.kOrange+2),
                ROOT.RooFit.LineColor(ROOT.kOrange+2),
                ROOT.RooFit.FillStyle(1001),
@@ -157,14 +157,15 @@ def showFinalFitResult(data,pdf,nll,SVLMass,mtop,outDir,tag=None):
     pdf.plotOn(frame,
                ROOT.RooFit.Name('tt'),
                ROOT.RooFit.ProjWData(data),
-               ROOT.RooFit.Components('simplemodel_*_tt'),
+               ROOT.RooFit.Components('simplemodel_*_tt_*'),
                #ROOT.RooFit.Components('ttshape_*,tshape_*'),
                #ROOT.RooFit.Components('*_ttcor_*'),
                ROOT.RooFit.FillColor(ROOT.kOrange),
                ROOT.RooFit.LineColor(ROOT.kOrange),
                ROOT.RooFit.DrawOption('f'),
                ROOT.RooFit.FillStyle(1001),
-               ROOT.RooFit.MoveToBack())
+               #ROOT.RooFit.MoveToBack()
+               )
     frame.Draw()
     frame.GetYaxis().SetTitleOffset(1.5)
     frame.GetXaxis().SetTitle("m(SV,lepton) [GeV]")
@@ -208,7 +209,6 @@ def showFinalFitResult(data,pdf,nll,SVLMass,mtop,outDir,tag=None):
     p2.SetTopMargin(0.05)
     p2.Draw()
     p2.cd()
-    hpull = frame.pullHist()
     pullFrame = SVLMass.frame()
     pullFrame.addPlotable(hpull,"P") ;
     pullFrame.Draw()
